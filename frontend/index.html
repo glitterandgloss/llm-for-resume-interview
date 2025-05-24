@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>面经爬取与分析系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .form-group textarea {
+            height: 120px;
+            resize: vertical;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #6c757d;
+            border: 2px solid #e1e5e9;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .results {
+            display: none;
+            margin-top: 30px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .keywords {
+            margin-bottom: 20px;
+        }
+        
+        .keyword-tag {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            margin: 3px;
+            font-size: 14px;
+        }
+        
+        .experience-item {
+            background: white;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .experience-source {
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .experience-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .experience-content {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            flex: 1;
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 面经爬取与分析系统</h1>
+            <p>基于MCP架构 · 讯飞星火大模型驱动</p>
+        </div>
+        
+        <div class="content">
+            <form id="jobForm">
+                <div class="form-group">
+                    <label for="position">职位名称</label>
+                    <input type="text" id="position" name="position" placeholder="例如：Python后端开发工程师" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="company">公司名称</label>
+                    <input type="text" id="company" name="company" placeholder="例如：字节跳动" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="requirements">职位要求</label>
+                    <textarea id="requirements" name="requirements" placeholder="请输入详细的职位要求描述..." required></textarea>
+                </div>
+                
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary" id="analyzeBtn">
+                        🚀 开始分析
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="keywordsBtn">
+                        🔍 仅提取关键词
+                    </button>
+                </div>
+            </form>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>正在分析职位描述并爬取面经，请稍候...</p>
+            </div>
+            
+            <div class="results" id="results">
+                <div class="keywords" id="keywords"></div>
+                <div class="stats" id="stats"></div>
+                <div class="experiences" id="experiences"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+        
+        document.getElementById('jobForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await analyzeJob(true);
+        });
+        
+        document.getElementById('keywordsBtn').addEventListener('click', async () => {
+            await analyzeJob(false);
+        });
+        
+        async function analyzeJob(fullAnalysis = true) {
+            const formData = new FormData(document.getElementById('jobForm'));
+            const jobData = {
+                position: formData.get('position'),
+                company: formData.get('company'),
+                requirements: formData.get('requirements')
+            };
+            
+            // 显示加载状态
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('analyzeBtn').disabled = true;
+            document.getElementById('keywordsBtn').disabled = true;
+            
+            try {
+                const endpoint = fullAnalysis ? '/analyze' : '/keywords';
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(jobData)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                displayResults(data, fullAnalysis);
+                
+            } catch (error) {
+                alert(`分析失败: ${error.message}`);
+                console.error('Error:', error);
+            } finally {
+                // 隐藏加载状态
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('analyzeBtn').disabled = false;
+                document.getElementById('keywordsBtn').disabled = false;
+            }
+        }
+        
+        function displayResults(data, fullAnalysis) {
+            const resultsDiv = document.getElementById('results');
+            const keywordsDiv = document.getElementById('keywords');
+            const statsDiv = document.getElementById('stats');
+            const experiencesDiv = document.getElementById('experiences');
+            
+            // 显示关键词
+            keywordsDiv.innerHTML = '<h3>📋 提取的关键词</h3>';
+            data.keywords.forEach(keyword => {
+                keywordsDiv.innerHTML += `<span class="keyword-tag">${keyword}</span>`;
+            });
+            
+            if (fullAnalysis && data.experiences) {
+                // 显示统计信息
+                statsDiv.innerHTML = `
+                    <div class="stat-item">
+                        <div class="stat-number">${data.total_count}</div>
+                        <div class="stat-label">总面经数</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">${Object.keys(data.platform_stats).length}</div>
+                        <div class="stat-label">平台数</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">${data.keywords.length}</div>
+                        <div class="stat-label">关键词数</div>
+                    </div>
+                `;
+                
+                // 显示面经
+                experiencesDiv.innerHTML = '<h3>📚 相关面经</h3>';
+                data.experiences.forEach(exp => {
+                    experiencesDiv.innerHTML += `
+                        <div class="experience-item">
+                            <div class="experience-source">[${exp.source}]</div>
+                            <div class="experience-title">${exp.title}</div>
+                            <div class="experience-content">${exp.content}</div>
+                        </div>
+                    `;
+                });
+            } else {
+                statsDiv.innerHTML = '';
+                experiencesDiv.innerHTML = '';
+            }
+            
+            resultsDiv.style.display = 'block';
+        }
+        
+        // 页面加载时填入示例数据
+        window.addEventListener('load', () => {
+            document.getElementById('position').value = 'Python后端开发工程师';
+            document.getElementById('company').value = '字节跳动';
+            document.getElementById('requirements').value = `1. 熟练掌握Python编程语言，有Django/Flask框架经验
+2. 熟悉MySQL、Redis等数据库
+3. 了解微服务架构和容器化技术
+4. 有分布式系统开发经验优先
+5. 具备良好的代码规范和团队协作能力`;
+        });
+    </script>
+</body>
+</html> 

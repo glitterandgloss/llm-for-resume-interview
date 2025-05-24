@@ -1,0 +1,18 @@
+{
+  "spark_api": {
+    "app_id": "63ea466b",
+    "api_key": "29908291fac790effc5fa9a727eb0118",
+    "api_secret": "YTYyOWM0YjYwZmZmYjQ4NGVhN2VjMmQ3",
+    "api_url": "wss://spark-api.xf-yun.com/v4.0/chat"
+  },
+  "crawler": {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+    "timeout": 10,
+    "max_retries": 3
+  },
+  "mcp_servers": {
+    "niuke": "http://localhost:8001",
+    "xiaohongshu": "http://localhost:8002",
+    "zhihu": "http://localhost:8003"
+  }
+} 
